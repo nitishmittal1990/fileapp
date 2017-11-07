@@ -9,7 +9,20 @@
     </style>
 </head>
 <body>
+	<nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    
+                    <li><a href="/logout">Logout</a></li>
+                    <li><a href="/files">files</a></li>
+                    <li><a href="/profile">profile</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 <div class="container">
+
 <div class="col-sm-6 col-sm-offset-3">
 	<% for (var key in fileobject) { %>
 		<a href="/folder"><%= fileobject[key] %></a>

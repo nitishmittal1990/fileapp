@@ -28,14 +28,25 @@
     <div class="row">
         <p>
             <% for(var key in subfolobj) {%>
-            <a href="/folder/user?username=<%=subfolobj[key] %>"><%= subfolobj[key] %></a> <br/>
+            <%= subfolobj[key] %> <br/>
             <% } %>
             
         </p>
 
         
     </div>
-    
+    <div class="row">
+        <form ref='uploadForm' 
+          id='uploadForm' 
+          action='/folder/user?username=<%=username%>' 
+          method='post' 
+          encType="multipart/form-data">
+            <input type="text" name="<%= username %>">
+            <input type="file" name="image" />
+            <input type='submit' value='Upload!' />
+        </form> 
+        
+    </div>
 
     <div class="text-center">
         <p>A demo by <a href="http://scotch.io">Scotch</a>.</p>

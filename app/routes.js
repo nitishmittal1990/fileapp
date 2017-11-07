@@ -1,5 +1,22 @@
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer')
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    let userdept = req.user.department.charAt(0).toUpperCase() + req.user.department.slice(1);
+    let username = req.query.username;
+    let dirpath = "./files/" +userdept + "/" + username;
+    cb(null, dirpath)
+  },
+  filename: function (req, file, cb) {
+    console.log(file); 
+    cb(null, file.originalname);
+    // cb(null, file.originalname + '-' + Date.now())
+  }
+})
+
+var upload = multer({ storage: storage })
 
 module.exports = function(app, passport) {
 
@@ -25,19 +42,92 @@ module.exports = function(app, passport) {
     app.get('/files', isLoggedIn, function(req, res){
         // console.log(req); 
         // var folders;
-        fs.readdir('./files', function(err, items) {
-            // console.log(items);
-            // console.log(typeof(items)); 
-            res.render('files.ejs', {
-                fileobject: items
-            });
+        var items = [];
+        console.log(req.user.role); 
+        if(req.user.role == 'superadmin') {
+            console.log('here'); 
+            items.push('Academics','Design','Finance','Marketing');
+        } else {
+            var department = req.user.department;
+            items.push(department);
+        }
+        res.render('files.ejs', {
+            fileobject: items
         });
+        
         // var folders = ["Academics", "Finance", "Design", "Marketing"]; 
         
     });
     app.get('/folder',isLoggedIn, function(req, res){
-        console.log(req.user); 
-        res.render('./folder.ejs');
+        if(req.user.role == 'admin'){
+            var userdept = req.user.department.charAt(0).toUpperCase() + req.user.department.slice(1);
+            var username ='';
+            let dirpath = "./files/" +userdept;
+            console.log(dirpath); 
+            fs.readdir(dirpath, function (err, files) {
+                //handling error
+                if (err) {
+                    return console.log('Unable to scan directory: ' + err);
+                } 
+                
+                // Do whatever you want to do with the file
+                res.render('folder.ejs', {
+                    subfolobj: files,
+                    username: req.user.firstname,
+                }); 
+                
+            });
+        } else {
+            res.render('folder.ejs',{
+                subfolobj: [req.user.firstname],
+                username: req.user.firstname
+            });
+        }
+        
+        
+        
+    });
+    app.get('/folder/user',isLoggedIn, function(req, res){
+        var username = req.query.username;
+        var userdept = req.user.department.charAt(0).toUpperCase() + req.user.department.slice(1);
+        let dirpath = "./files/" +userdept + "/" + username;
+        // console.log(dirpath); 
+        fs.readdir(dirpath, function (err, files) {
+            //handling error
+            if (err) {
+                return console.log('Unable to scan directory: ' + err);
+            } 
+            
+            // Do whatever you want to do with the file
+            res.render('userfile.ejs', {
+                subfolobj: files,
+                username: req.query.username,
+            }); 
+            
+        });
+        
+    });
+    app.post('/folder/user',isLoggedIn, upload.single('image'), function(req, res, next){
+
+        let userdept = req.user.department.charAt(0).toUpperCase() + req.user.department.slice(1);
+        var username = req.query.username;
+        let dirpath = "./files/" +userdept + "/" + username;
+        console.log(dirpath); 
+        
+        fs.readdir(dirpath, function (err, files) {
+            //handling error
+            if (err) {
+                return console.log('Unable to scan directory: ' + err);
+            } 
+            
+            // Do whatever you want to do with the file
+            res.render('userfile.ejs', {
+                subfolobj: files,
+                username: req.query.username
+            }); 
+            
+        });
+        
     });
 // =============================================================================
 // AUTHENTICATE (FIRST LOGIN) ==================================================
@@ -117,3 +207,7 @@ function isLoggedIn(req, res, next) {
 
     res.redirect('/');
 }
+
+
+
+
