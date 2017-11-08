@@ -7,6 +7,10 @@
     <style>
         body         { padding-top:80px; word-wrap:break-word; }
     </style>
+    <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="container">
@@ -28,7 +32,18 @@
     <div class="row">
         <p>
             <% for(var key in subfolobj) {%>
-            <%= subfolobj[key] %> <br/>
+            <ul class="list-unstyled">
+                <li class="filesingle">
+                    <span>Filename: </span>
+                    <span style="display: inline-block;padding: 0 12px;"><%= subfolobj[key] %> </span>
+                    <a href="/folder/download?username=<%= username %>&filename=<%=subfolobj[key] %>">Download</a>
+                    <!-- <a href="/folder/user?username=<%= username %>&filename=<%=subfolobj[key] %>">Delete</a> -->
+                    <a href="javascript:void(0);" class="deletebtn" data-file="<%=subfolobj[key] %>" data-user="<%= username %>">
+                        Delete
+                    </a>
+                </li>
+            </ul>
+            
             <% } %>
             
         </p>
@@ -40,8 +55,7 @@
           id='uploadForm' 
           action='/folder/user?username=<%=username%>' 
           method='post' 
-          encType="multipart/form-data">
-            <input type="text" name="<%= username %>">
+          encType="multipart/form-data"> 
             <input type="file" name="image" />
             <input type='submit' value='Upload!' />
         </form> 
@@ -54,5 +68,28 @@
     </div>
 
 </div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        console.log('working'); 
+        $('.deletebtn').on("click",function(){
+            var el = $(this).parent('.filesingle');
+            console.log(el);
+            var filename = $(this).data('file');
+            var username = $(this).data('user');
+            console.log(filename); 
+            console.log(username);
+            $.ajax({
+                url: '/folder/user/'+username+ "/file/"+filename,
+                type: 'DELETE',
+                    success: function(result) {
+                        data = result;
+                        console.log(result);
+                        el.remove();
+                    }
+                });
+            })
+        })
+        
+</script>
 </body>
 </html>

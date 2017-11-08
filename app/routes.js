@@ -10,7 +10,7 @@ var storage = multer.diskStorage({
     cb(null, dirpath)
   },
   filename: function (req, file, cb) {
-    console.log(file); 
+    // console.log(file); 
     cb(null, file.originalname);
     // cb(null, file.originalname + '-' + Date.now())
   }
@@ -45,7 +45,7 @@ module.exports = function(app, passport) {
         var items = [];
         console.log(req.user.role); 
         if(req.user.role == 'superadmin') {
-            console.log('here'); 
+            console.log('Inside Superadmin Role'); 
             items.push('Academics','Design','Finance','Marketing');
         } else {
             var department = req.user.department;
@@ -105,6 +105,44 @@ module.exports = function(app, passport) {
             }); 
             
         });
+        
+    });
+
+    // Files download request
+    app.get('/folder/download',isLoggedIn, function(req, res){
+        var username = req.query.username;
+        var filename = req.query.filename;
+        var userdept = req.user.department.charAt(0).toUpperCase() + req.user.department.slice(1);
+        let dirpath = "./files/" +userdept + "/" + username + "/" + filename;
+        res.download(dirpath);
+        
+    });
+    app.delete('/folder/user/:username/file/:filename',isLoggedIn, function(req, res){
+        // var username = req.data.username;
+        console.log("request", req);
+        var username = req.params.username;
+        console.log("username", username);  
+        var filename = req.params.filename;
+        // console.log(username);
+        var userdept = req.user.department.charAt(0).toUpperCase() + req.user.department.slice(1);
+        let dirpath = "./files/" +userdept + "/" + username + "/" + filename;
+        let dirpath1 = "./files/" +userdept + "/" + username;
+        // console.log(dirpath); 
+        fs.unlink(dirpath, function(err) {
+            if (err) {
+                return console.log('unable to delete', err); 
+            }
+            fs.readdir(dirpath1, function (err, files) {
+            //handling error
+                if (err) {
+                    return console.log('Unable to scan directory: ' + err);
+                } 
+                
+                // Do whatever you want to do with the file
+                res.send(files);
+                
+            });
+        })
         
     });
     app.post('/folder/user',isLoggedIn, upload.single('image'), function(req, res, next){
