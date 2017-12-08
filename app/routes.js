@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const multer = require('multer')
+const multer = require('multer');
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -45,7 +45,6 @@ module.exports = function(app, passport) {
         var items = [];
         console.log(req.user.role); 
         if(req.user.role == 'superadmin') {
-            console.log('Inside Superadmin Role'); 
             items.push('Academics','Design','Finance','Marketing');
         } else {
             var department = req.user.department;
@@ -59,7 +58,8 @@ module.exports = function(app, passport) {
         
     });
     app.get('/folder',isLoggedIn, function(req, res){
-        if(req.user.role == 'admin'){
+        console.log(req.user.role);
+        if(req.user.role == 'superadmin'){
             var userdept = req.user.department.charAt(0).toUpperCase() + req.user.department.slice(1);
             var username ='';
             let dirpath = "./files/" +userdept;
